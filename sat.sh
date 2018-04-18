@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Path to this file
+
 path="/home/pi/sat.sh"
 
 main () {
@@ -13,6 +13,8 @@ main () {
 		#Schedule Satellite Passes:
 		set_sat_cycle "NOAA 19" 137.1000
 		set_sat_cycle "NOAA 18" 137.9125
+		set_sat_cycle "NOAA 15" 137.6200
+		set_sat_cycle "METEOR-M 1" 137.1000
 	else
 		# start recording if arg < 0 and pass data
 		# $1 = Satellite Name
@@ -27,17 +29,18 @@ main () {
 }
 
 set_sat_cycle() {
+
 	# cutting upper part of prediction
-	PREDICTION_START=`/usr/bin/predict -t /etc/sat_data/data.tle -p "${1}" | head -1`
+	PREDICTION_START=`/usr/bin/predict -t /etc/sat_data/data.txt -p "${1}" | head -1`
 	# cutting lower part of prediction
-	PREDICTION_END=`/usr/bin/predict -t /etc/sat_data/data.tle -p "${1}" | tail -1`
+	PREDICTION_END=`/usr/bin/predict -t /etc/sat_data/data.txt -p "${1}" | tail -1`
 
 	# extracting end date
 	var2=`echo $PREDICTION_END | cut -d " " -f 1`
-	
+
 	# extracting elevation
-	MAXELEV=`/usr/bin/predict -t /etc/sat_data/data.tle -p "${1}" | awk -v max=0 '{if($5>max){max=$5}}END{print max}'`
-	
+	MAXELEV=`/usr/bin/predict -t /etc/sat_data/data.txt -p "${1}" | awk -v max=0 '{if($5>max){max=$5}}END{print max}'`
+
 	# converting dates
 	while [ `date --date="TZ=\"UTC\" @${var2}" +%D` == `date +%D` ]; do
 
@@ -52,10 +55,10 @@ set_sat_cycle() {
 
 	# calc pass tim
 	TIMER=`expr $var2 - $var1 + $var3`
-	
+
 	# converting dates
 	OUTDATE=`date --date="TZ=\"UTC\" $START_TIME" +%Y%m%d-%H%M%S`
-	
+
 	# check pass elevation
 	if [ $MAXELEV -gt 19 ]
 	  then
@@ -63,18 +66,18 @@ set_sat_cycle() {
 		path_temp="/var/www/html/sat/${1//" "}${OUTDATE}"
 		echo ${1//" "}${OUTDATE} $MAXELEV
 		# create at job
-		echo "$path \"${1}\" $2 $path_temp/NOAA /etc/sat_data/data.tle $var1 $TIMER $path_temp" | at `date --date="TZ=\"UTC\" $START_TIME" +"%H:%M %D"`
+		echo "$path \"${1}\" $2 $path_temp/NOAA /etc/sat_data/data.txt $var1 $TIMER $path_temp" | at `date --date="TZ=\"UTC\" $START_TIME" +"%H:%M %D"`
 		time_cest=`date -d "$START_TIME UTC"`
 		# tee passes to pass file
 		echo "$1, $2, $time_cest" | tee -a /var/www/html/sat/passes.txt
 	fi
-	
+
 	nextpredict=`expr $var2 + 60`
 
-	PREDICTION_START=`/usr/bin/predict -t /etc/sat_data/data.tle -p "${1}" $nextpredict | head -1`
-	PREDICTION_END=`/usr/bin/predict -t /etc/sat_data/data.tle -p "${1}"  $nextpredict | tail -1`
+	PREDICTION_START=`/usr/bin/predict -t /etc/sat_data/data.txt -p "${1}" $nextpredict | head -1`
+	PREDICTION_END=`/usr/bin/predict -t /etc/sat_data/data.txt -p "${1}"  $nextpredict | tail -1`
 
-	MAXELEV=`/usr/bin/predict -t /etc/sat_data/data.tle -p "${1}" $nextpredict | awk -v max=0 '{if($5>max){max=$5}}END{print max}'`
+	MAXELEV=`/usr/bin/predict -t /etc/sat_data/data.txt -p "${1}" $nextpredict | awk -v max=0 '{if($5>max){max=$5}}END{print max}'`
 
 	var2=`echo $PREDICTION_END | cut -d " " -f 1`
 
@@ -89,7 +92,7 @@ rec_sat_data () {
 	# $5 = EPOC start time
 	# $6 = Time to capture
 	# $7 = File Path
-	
+
 	# create folder for final files
 	mkdir $7
 
@@ -98,10 +101,10 @@ rec_sat_data () {
 	time_now=`date`;
 	# save pass data in NOAA.txt 
 	echo "$1,$2,$time_now" > $7/NOAA.txt
-	
+
 	# start recording
 	sudo timeout $6 rtl_fm -f ${2}M -s 60k -g 45 -p 55 -E wav -E deemp -F 9 - | sox -t wav - $3.wav rate 11025
-	
+
 	# calc pass start time
 	PassStart=`expr $5 + 90`
 
@@ -123,8 +126,6 @@ update_sat_data () {
 
 	# downloading updated sat information
 	wget -qr https://www.celestrak.com/NORAD/elements/weather.txt -O /etc/sat_data/data.txt
-	grep "NOAA 18" /etc/sat_data/data.txt -A 2 >> /etc/sat_data/data.tle
-	grep "NOAA 19" /etc/sat_data/data.txt -A 2 >> /etc/sat_data/data.tle
 }
 
 main "$@"
