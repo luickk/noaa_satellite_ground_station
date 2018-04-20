@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 
@@ -13,8 +14,7 @@ main () {
 		#Schedule Satellite Passes:
 		set_sat_cycle "NOAA 19" 137.1000
 		set_sat_cycle "NOAA 18" 137.9125
-		set_sat_cycle "NOAA 15" 137.6200
-		set_sat_cycle "METEOR-M 1" 137.1000
+		#set_sat_cycle "NOAA 15" 137.6200
 	else
 		# start recording if arg < 0 and pass data
 		# $1 = Satellite Name
@@ -60,7 +60,7 @@ set_sat_cycle() {
 	OUTDATE=`date --date="TZ=\"UTC\" $START_TIME" +%Y%m%d-%H%M%S`
 
 	# check pass elevation
-	if [ $MAXELEV -gt 19 ]
+	if [ $MAXELEV -gt 30 ]
 	  then
 		# path for final file location
 		path_temp="/var/www/html/sat/${1//" "}${OUTDATE}"
@@ -110,9 +110,17 @@ rec_sat_data () {
 
 
 	if [ -e $3.wav ]; then
+		# creating map overlay
 		/usr/local/bin/wxmap -T "${1}" -H $4 -p 0 -l 0 -o $PassStart ${3}-map.png
-
-		/usr/local/bin/wxtoimg -m ${3}-map.png -e ZA $3.wav $3.png
+		
+		# creating standard image
+		/usr/local/bin/wxtoimg -m ${3}-map.png -e HVC $3.wav $3.png
+		
+		# creating colored image
+		/usr/local/bin/wxtoimg -m ${3}-map.png -e MSA $3.wav $3C.png
+		
+		# creating thermal image
+		/usr/local/bin/wxtoimg -m ${3}-map.png -e therm $3.wav $3T.png
 	fi
 }
 
