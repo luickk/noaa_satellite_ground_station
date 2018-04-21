@@ -58,7 +58,7 @@ Images
 
 ![Antenna](https://image.ibb.co/gcxs7S/2018_04_11_17_06_29.jpg)
 
-![Sat image](https://preview.ibb.co/naQqu7/NOAA1920180413_163052.png)
+![Sat image](https://image.ibb.co/eJaVrn/NOAA.png)
 
 ![Website](https://image.ibb.co/nGbvmn/Unbenannt.png)
 
