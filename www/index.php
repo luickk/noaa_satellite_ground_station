@@ -33,6 +33,7 @@
 			$("#show_time").html(sat_time);
 			$("#show_time_ac").html("Time of pass");
 			$("#show_emp").html("");
+			$("#img_sat").attr("src","");
 			
 			// get height and width of screen
 			var h=$(window).height(),
