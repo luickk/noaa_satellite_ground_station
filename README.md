@@ -54,12 +54,10 @@ Partlist
 Images
 -------------------
 
-![Raspberry Pi](https://preview.ibb.co/hc8znS/2018_04_10_17_03_50.jpg)
+![Raspberry Pi](media/1.jpg)
 
-![Antenna](https://image.ibb.co/gcxs7S/2018_04_11_17_06_29.jpg)
+![Antenna](media/2.png)
 
-![Sat image](https://image.ibb.co/eJaVrn/NOAA.png)
+![Sat image](media/3.png)
 
-![Website](https://image.ibb.co/nGbvmn/Unbenannt.png)
-
-![Website with img loaded](https://image.ibb.co/kxnCXS/asd.png)
+![Website](media/4.jpg)
